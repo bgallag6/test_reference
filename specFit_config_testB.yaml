@@ -1,0 +1,56 @@
+M1_guess: null
+M1_high:
+- 0.002
+- 6.0
+- 0.01
+M1_low:
+- -0.002
+- 0.3
+- -0.01
+M2_guess: null
+M2_high:
+- 0.002
+- 6.0
+- 0.01
+- 0.2
+- -4.6
+- 0.8
+M2_low:
+- 0.0
+- 0.3
+- -0.01
+- 1.0e-05
+- -6.5
+- 0.05
+bin_frac: 1
+date: '20141227'
+fits_dir: S:FITS/20180223/1700
+fits_dirs:
+- S:FITS/20141227/1600
+- S:FITS/20141227/1700
+- S:FITS/20151027/1600
+- S:FITS/20151027/1700
+- S:FITS/20180223/1600
+- S:FITS/20180223/1700
+jpg_dir: S:/FITS/./test/Images/20120606/1600/demo_jpg
+mmap_datacube: true
+mmap_spectra: true
+num_segments: 6
+processed_dir: ./test/Processed/20180223/1700
+processed_dirs:
+- ./test/Processed/20141227/1600
+- ./test/Processed/20141227/1700
+- ./test/Processed/20151027/1600
+- ./test/Processed/20151027/1700
+- ./test/Processed/20180223/1600
+- ./test/Processed/20180223/1700
+save_fig: false
+specVis_dir: ./test/Processed/20141227/1600
+spec_unc: adhoc
+sub_reg_coords:
+- -100
+- 100
+- 250
+- 400
+time_step: mode
+wavelength: 1600

@@ -1,0 +1,27 @@
+fits_dir: "S:FITS/20141227/1600"
+jpg_dir: "S:/FITS/./test/Images/20120606/1600/demo_jpg"
+date: "20141227"
+wavelength: 1600
+sub_reg_coords: [-100,100,250,400]
+
+bin_frac: 1
+
+processed_dir: "./test/Processed/20141227/1600"
+mmap_datacube: True
+
+num_segments: 6
+time_step: mode
+
+mmap_spectra: True
+spec_unc: "adhoc"
+M1_low: [-0.002, 0.3, -0.01]
+M1_high: [0.002, 6., 0.01]
+M2_low: [0., 0.3, -0.01, 0.00001, -6.5, 0.05]
+M2_high: [0.002, 6., 0.01, 0.2, -4.6, 0.8]
+M1_guess:
+M2_guess:
+
+save_fig: False
+
+specVis_dir: "./test/Processed/20141227/1600"
+
