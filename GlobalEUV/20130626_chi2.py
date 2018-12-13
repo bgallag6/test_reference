@@ -18,7 +18,7 @@ font_size = 27  # set the font size to be used for all text - titles, tick marks
 directory = 'F:'
 date = '20130626'
 wavelength = 1700
-savefig = True
+savefig = False
 
   
 # 11-param-list

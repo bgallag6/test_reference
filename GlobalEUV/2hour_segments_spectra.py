@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jul 19 08:33:03 2018
+Created on Fri Jul 13 10:05:29 2018
 
 @author: Brendan
 """
@@ -157,14 +157,14 @@ date = '20130626'
 wavelength = 171
 n_segments = 6
 
-cube_shape = np.load('%s/DATA/Temp/%s/%i/derotated_mmap_shape.npy' % (directory, date, wavelength))
-cube = np.memmap('%s/DATA/Temp/%s/%i/derotated_mmap.npy' % (directory, date, wavelength), dtype='int16', mode='r', shape=(cube_shape[0], cube_shape[1], cube_shape[2]))
+cube_shape = np.load('%s/DATA/%s/%i/derotated_mmap_shape.npy' % (directory, date, wavelength))
+cube = np.memmap('%s/DATA/%s/%i/derotated_mmap.npy' % (directory, date, wavelength), dtype='int16', mode='r', shape=(cube_shape[0], cube_shape[1], cube_shape[2]))
 
-time = np.load('%s/DATA/Temp/%s/%i/time.npy' % (directory, date, wavelength))
-exposure = np.load('%s/DATA/Temp/%s/%i/exposure.npy' % (directory, date, wavelength))
+time = np.load('%s/DATA/%s/%i/time.npy' % (directory, date, wavelength))
+exposure = np.load('%s/DATA/%s/%i/exposure.npy' % (directory, date, wavelength))
 
-hmap = np.load('%s/DATA/Output/%s/%i/param.npy' % (directory, date, wavelength))[1]
-vis = np.load('%s/DATA/Output/%s/%i/visual.npy' % (directory, date, wavelength))
+hmap = np.load('%s/DATA/%s/%i/param.npy' % (directory, date, wavelength))[1]
+vis = np.load('%s/DATA/%s/%i/visual.npy' % (directory, date, wavelength))
 
 font_size = 15
 
@@ -208,9 +208,9 @@ t_interp = t_interp[:len(t_interp)-rem]
 t_split = np.split(t_interp, n_segments)  # create split array for each segment
 
 #"""   
-#for i in range(n_segments):    
+for i in range(n_segments):    
 #for i in [0,1,3,4,5]: 
-for i in [0,3,4,5]:         
+#for i in [0,3,4,5]:         
     
   ## perform Fast Fourier Transform on each segment       
   sig = split[i]
@@ -250,20 +250,28 @@ for i in [0,3,4,5]:
   plt.text(0.005, 10**-0.5, r'$n$ = {0:0.2f}'.format(param[1]), fontsize=font_size)
   #plt.savefig('C:/Users/Brendan/Desktop/segment%iof%i.pdf' % ((i+1),n_segments), format='pdf', bbox_inches='tight')
 
-#avg_array /= n_segments  # take the average of the segments
+avg_array /= n_segments  # take the average of the segments
 #avg_array /= 5  # take the average of the segments
-avg_array /= 4  # take the average of the segments
+#avg_array /= 4  # take the average of the segments
 
 
 # plot timeseries & spectrum for averaged segments
 param, model_fit = spec_fit(avg_array)
 print('%0.3e, %0.3e, %0.3e, %0.3e, %0.2f, %0.2f' % (param[0], param[1], param[2], param[3], param[4], param[5]))
 
-plt.figure(figsize=(7,6))
-ax2 = plt.gca()  
-#ax2.set_title('Averaged Spectrum', y=1.01, fontsize=font_size)
-#ax2.set_title('Averaged Spectrum w/o Segment 3', y=1.01, fontsize=font_size)
-ax2.set_title('Averaged Spectrum w/o Segments 2 & 3', y=1.01, fontsize=font_size)
+plt.figure(figsize=(14,6))
+#ax1 = plt.subplot2grid((20,11),(1, 0), colspan=11, rowspan=9)
+ax1 = plt.subplot2grid((10,22),(0, 0), colspan=10, rowspan=10)
+ax1.set_title('Timeseries', y=1.01, fontsize=font_size)
+plt.plot(t_interp/60, v_interp)
+plt.ylim(0,1700)
+ax1.set_ylabel('Intensity', fontsize=font_size-2)
+ax1.set_xlabel('Time [min]', fontsize=font_size-2)
+  
+#ax2 = plt.subplot2grid((20,11),(11, 0), colspan=11, rowspan=9)
+ax2 = plt.subplot2grid((10,22),(0, 12), colspan=10, rowspan=10)
+ax2.set_title('Averaged Spectrum', y=1.01, fontsize=font_size)
+#ax2.set_title('Averaged Spectrum w/o Segment #3', y=1.01, fontsize=font_size)
 plt.loglog(freqs, avg_array)
 plt.loglog(freqs, model_fit)
 plt.xlim(10**-5, 10**-1)
@@ -273,10 +281,10 @@ ax2.set_xlabel('Frequency [Hz]', fontsize=font_size-2)
 plt.text(0.005, 10**-0.5, r'$n$ = {0:0.2f}'.format(param[1]), fontsize=font_size)
 #plt.text(0.00503, 10**-0.77, r'$\beta$ = {0:0.1f} [min]'.format((1./np.exp(param[4]))/60.), fontsize=font_size)
 #plt.savefig('C:/Users/Brendan/Desktop/6x2hour_averaged_spectrum.pdf', format='pdf', bbox_inches='tight')
-#plt.savefig('C:/Users/Brendan/Desktop/6x2hour_averaged_spectrum_minus_seg2and3.pdf', format='pdf', bbox_inches='tight')
+#plt.savefig('C:/Users/Brendan/Desktop/6x2hour_averaged_spectrum_minus_seg3.pdf', format='pdf', bbox_inches='tight')
 #"""
 
-"""
+
 # plot timeseries & spectrum from full 12-hours
 sample_freq = fftpack.fftfreq(len(t_interp), d=time_step)
 pidxs = np.where(sample_freq > 0)
@@ -289,6 +297,18 @@ norm = len(v_interp)
 powers = ((powers/norm)**2)*(1./(v_interp.std()**2))*2   # normalize the power
 
 powers *= 6
+
+"""
+plt.figure()
+ax1 = plt.subplot2grid((20,11),(1, 0), colspan=11, rowspan=9)
+plt.plot(t_interp/60, v_interp)
+plt.ylim(0,1700)
+  
+ax2 = plt.subplot2grid((20,11),(11, 0), colspan=11, rowspan=9)
+plt.loglog(freqs, powers*6)
+plt.xlim(10**-4.5, 10**-1)
+plt.ylim(10**-5, 10**0)
+"""
 
 param, model_fit = spec_fit(powers)
 print('%0.3e, %0.3e, %0.3e, %0.3e, %0.2f, %0.2f' % (param[0], param[1], param[2], param[3], param[4], param[5]))
@@ -313,4 +333,35 @@ ax2.set_ylabel('Power', fontsize=font_size-2)
 ax2.set_xlabel('Frequency [Hz]', fontsize=font_size-2)
 plt.text(0.005, 10**-0.5, r'$n$ = {0:0.2f}'.format(param[1]), fontsize=font_size)
 #plt.text(0.00503, 10**-0.77, r'$\beta$ = {0:0.1f} [min]'.format((1./np.exp(param[4]))/60.), fontsize=font_size)
+
+
+"""
+# averaging timeseries segments
+
+v_avg = (split[0] + split[1] + split[2] + split[3] + split[4] + split[5]) / 6
+
+# plot timeseries & spectrum from full 12-hours
+sample_freq = fftpack.fftfreq(len(t_split[0]), d=time_step)
+pidxs = np.where(sample_freq > 0)
+freqs = sample_freq[pidxs]
+
+sig_fft = fftpack.fft(v_avg)
+#sig_fft = fftpack.rfft(sig)  # real-FFT                
+powers = np.abs(sig_fft)[pidxs]
+norm = len(v_avg)
+powers = ((powers/norm)**2)*(1./(v_avg.std()**2))*2   # normalize the power
+
+param, model_fit = spec_fit(powers)
+print('%0.3e, %0.3e, %0.3e, %0.3e, %0.2f, %0.2f' % (param[0], param[1], param[2], param[3], param[4], param[5]))
+
+plt.figure(figsize=(14,6))
+ax1 = plt.subplot2grid((10,21),(0, 0), colspan=10, rowspan=10)
+plt.plot(t_split[0]/60, v_avg)
+plt.ylim(0,1700)
+  
+ax2 = plt.subplot2grid((10,21),(0, 11), colspan=10, rowspan=10)
+plt.loglog(freqs, powers)
+plt.loglog(freqs, model_fit)
+plt.xlim(10**-5, 10**-1)
+plt.ylim(10**-5.5, 10**0.5)
 """

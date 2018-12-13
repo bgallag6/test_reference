@@ -17,14 +17,14 @@ date = '20130626'
 wavelength = 171
 n_segments = 6
 
-cube_shape = np.load('%s/DATA/Temp/%s/%i/derotated_mmap_shape.npy' % (directory, date, wavelength))
-cube = np.memmap('%s/DATA/Temp/%s/%i/derotated_mmap.npy' % (directory, date, wavelength), dtype='int16', mode='r', shape=(cube_shape[0], cube_shape[1], cube_shape[2]))
+cube_shape = np.load('%s/DATA/%s/%i/derotated_mmap_shape.npy' % (directory, date, wavelength))
+cube = np.memmap('%s/DATA/%s/%i/derotated_mmap.npy' % (directory, date, wavelength), dtype='int16', mode='r', shape=(cube_shape[0], cube_shape[1], cube_shape[2]))
 
-time = np.load('%s/DATA/Temp/%s/%i/time.npy' % (directory, date, wavelength))
-exposure = np.load('%s/DATA/Temp/%s/%i/exposure.npy' % (directory, date, wavelength))
+time = np.load('%s/DATA/%s/%i/time.npy' % (directory, date, wavelength))
+exposure = np.load('%s/DATA/%s/%i/exposure.npy' % (directory, date, wavelength))
 
-hmap = np.load('%s/DATA/Output/%s/%i/param.npy' % (directory, date, wavelength))[4]
-vis = np.load('%s/DATA/Output/%s/%i/visual.npy' % (directory, date, wavelength))
+hmap = np.load('%s/DATA/%s/%i/param.npy' % (directory, date, wavelength))[4]
+vis = np.load('%s/DATA/%s/%i/visual.npy' % (directory, date, wavelength))
 
 font_size = 15
 

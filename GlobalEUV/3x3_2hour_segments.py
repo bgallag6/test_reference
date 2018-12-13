@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Jul 13 10:05:29 2018
+Created on Wed Jul 18 08:21:10 2018
 
 @author: Brendan
 """
@@ -10,6 +10,7 @@ import scipy.signal
 import matplotlib.pyplot as plt
 from scipy import fftpack
 from scipy.stats.stats import pearsonr 
+import matplotlib.patches as mpatches
 
 
 # define Power-Law-fitting function (Model M1)
@@ -157,14 +158,14 @@ date = '20130626'
 wavelength = 171
 n_segments = 6
 
-cube_shape = np.load('%s/DATA/Temp/%s/%i/derotated_mmap_shape.npy' % (directory, date, wavelength))
-cube = np.memmap('%s/DATA/Temp/%s/%i/derotated_mmap.npy' % (directory, date, wavelength), dtype='int16', mode='r', shape=(cube_shape[0], cube_shape[1], cube_shape[2]))
+cube_shape = np.load('%s/DATA/%s/%i/derotated_mmap_shape.npy' % (directory, date, wavelength))
+cube = np.memmap('%s/DATA/%s/%i/derotated_mmap.npy' % (directory, date, wavelength), dtype='int16', mode='r', shape=(cube_shape[0], cube_shape[1], cube_shape[2]))
 
-time = np.load('%s/DATA/Temp/%s/%i/time.npy' % (directory, date, wavelength))
-exposure = np.load('%s/DATA/Temp/%s/%i/exposure.npy' % (directory, date, wavelength))
+time = np.load('%s/DATA/%s/%i/time.npy' % (directory, date, wavelength))
+exposure = np.load('%s/DATA/%s/%i/exposure.npy' % (directory, date, wavelength))
 
-hmap = np.load('%s/DATA/Output/%s/%i/param.npy' % (directory, date, wavelength))[1]
-vis = np.load('%s/DATA/Output/%s/%i/visual.npy' % (directory, date, wavelength))
+hmap = np.load('%s/DATA/%s/%i/param.npy' % (directory, date, wavelength))[4]
+vis = np.load('%s/DATA/%s/%i/visual.npy' % (directory, date, wavelength))
 
 font_size = 15
 
@@ -190,73 +191,125 @@ pixmed = np.zeros(cube.shape[0])  # Initialize array to hold median pixel values
 x0 = [853, 300, 965, 834]
 y0 = [316, 520, 865, 1413]    
 
-x = x0[1]
-y = y0[1]
+spectra_seg = np.zeros((9,len(freqs)))
+full_spec_avg = np.zeros((6,len(freqs)))
+
+
+
+for seg in range(6):
+    count = 0
+    for m0 in [-1,0,1]:
+        for n0 in [-1,0,1]:
+            
+            x = x0[1] + n0
+            y = y0[1] + m0
+            print(x,y)
+                
+            pixmed = cube[:,y,x] / exposure  # extract timeseries + normalize by exposure time   
+            
+            v_interp = np.interp(t_interp,time,pixmed)  # interpolate pixel-intensity values onto specified time grid
+            
+            data = v_interp
+            
+            avg_array = np.zeros((len(freqs)))  # initialize array to hold fourier powers
+            
+            data = data[0:len(data)-rem]  # trim timeseries to be integer multiple of n_segments
+            split = np.split(data, n_segments)  # create split array for each segment
+            t_interp = t_interp[:len(t_interp)-rem]
+            t_split = np.split(t_interp, n_segments)  # create split array for each segment
+            
+            #"""   
+            #for i in range(n_segments):    
+            #for i in [0,1,3,4,5]: 
+            #for i in [1,2,3,4,5]: 
+            #for i in [0,3,4,5]:  
+            for i in [seg]: 
+                
+              ## perform Fast Fourier Transform on each segment       
+              sig = split[i]
+              t = t_split[i]
+              sig_fft = fftpack.fft(sig)
+              #sig_fft = fftpack.rfft(sig)  # real-FFT                
+              #sig_fft = accelerate.mkl.fftpack.fft(sig)  # MKL-accelerated is (2x) faster
+              #sig_fft = accelerate.mkl.fftpack.rfft(sig)  # this is slightly faster
+              powers = np.abs(sig_fft)[pidxs]
+              norm = len(sig)
+              powers = ((powers/norm)**2)*(1./(sig.std()**2))*2   # normalize the power
+              avg_array += powers
+              
+              """
+              # plot timeseries & spectrum for each segment
+              param, model_fit = spec_fit(powers)
+              print('%0.3e, %0.3e, %0.3e, %0.3e, %0.2f, %0.2f' % (param[0], param[1], param[2], param[3], param[4], param[5]))
+              
+              plt.figure(figsize=(14,6))
+              #ax1 = plt.subplot2grid((20,11),(1, 0), colspan=11, rowspan=9)
+              ax1 = plt.subplot2grid((10,22),(0, 0), colspan=10, rowspan=10)
+              ax1.set_title('Timeseries', y=1.01, fontsize=font_size)
+              plt.plot(t/60, sig)
+              plt.ylim(0,1700)
+              ax1.set_ylabel('Intensity', fontsize=font_size-2)
+              ax1.set_xlabel('Time [min]', fontsize=font_size-2)
+              
+              #ax2 = plt.subplot2grid((20,11),(11, 0), colspan=11, rowspan=9)
+              ax2 = plt.subplot2grid((10,22),(0, 12), colspan=10, rowspan=10)
+              ax2.set_title('Segment Spectrum #%i' % (i+1), y=1.01, fontsize=font_size)
+              plt.loglog(freqs, powers)
+              plt.loglog(freqs, model_fit)
+              plt.xlim(10**-5, 10**-1)
+              plt.ylim(10**-5.5, 10**0.5)
+              ax2.set_ylabel('Power', fontsize=font_size-2)
+              ax2.set_xlabel('Frequency [Hz]', fontsize=font_size-2)
+              plt.text(0.005, 10**-0.5, r'$n$ = {0:0.2f}'.format(param[1]), fontsize=font_size)
+              #plt.savefig('C:/Users/Brendan/Desktop/segment%iof%i.pdf' % ((i+1),n_segments), format='pdf', bbox_inches='tight')
+              """
+            #avg_array /= n_segments  # take the average of the segments
+            #avg_array /= 5  # take the average of the segments
+            
+            spectra_seg[count] = avg_array
+            count += 1
     
-pixmed = cube[:,y,x] / exposure  # extract timeseries + normalize by exposure time   
-
-v_interp = np.interp(t_interp,time,pixmed)  # interpolate pixel-intensity values onto specified time grid
-
-data = v_interp
-
-avg_array = np.zeros((len(freqs)))  # initialize array to hold fourier powers
-spectra_segs = np.zeros((6,len(freqs)))
-
-data = data[0:len(data)-rem]  # trim timeseries to be integer multiple of n_segments
-split = np.split(data, n_segments)  # create split array for each segment
-t_interp = t_interp[:len(t_interp)-rem]
-t_split = np.split(t_interp, n_segments)  # create split array for each segment
-
-#"""   
-for i in range(n_segments):    
-#for i in [0,1,3,4,5]: 
-#for i in [0,3,4,5]:         
+    """
+    ### 3x3 Averaging
+    """
     
-  ## perform Fast Fourier Transform on each segment       
-  sig = split[i]
-  t = t_split[i]
-  sig_fft = fftpack.fft(sig)
-  #sig_fft = fftpack.rfft(sig)  # real-FFT                
-  #sig_fft = accelerate.mkl.fftpack.fft(sig)  # MKL-accelerated is (2x) faster
-  #sig_fft = accelerate.mkl.fftpack.rfft(sig)  # this is slightly faster
-  powers = np.abs(sig_fft)[pidxs]
-  norm = len(sig)
-  powers = ((powers/norm)**2)*(1./(sig.std()**2))*2   # normalize the power
-  spectra_segs[i] = powers
-  avg_array += powers
-  
-  # plot timeseries & spectrum for each segment
-  param, model_fit = spec_fit(powers)
-  print('%0.3e, %0.3e, %0.3e, %0.3e, %0.2f, %0.2f' % (param[0], param[1], param[2], param[3], param[4], param[5]))
-  
-  plt.figure(figsize=(14,6))
-  #ax1 = plt.subplot2grid((20,11),(1, 0), colspan=11, rowspan=9)
-  ax1 = plt.subplot2grid((10,22),(0, 0), colspan=10, rowspan=10)
-  ax1.set_title('Timeseries', y=1.01, fontsize=font_size)
-  plt.plot(t/60, sig)
-  plt.ylim(0,1700)
-  ax1.set_ylabel('Intensity', fontsize=font_size-2)
-  ax1.set_xlabel('Time [min]', fontsize=font_size-2)
-  
-  #ax2 = plt.subplot2grid((20,11),(11, 0), colspan=11, rowspan=9)
-  ax2 = plt.subplot2grid((10,22),(0, 12), colspan=10, rowspan=10)
-  ax2.set_title('Segment Spectrum #%i' % (i+1), y=1.01, fontsize=font_size)
-  plt.loglog(freqs, powers)
-  plt.loglog(freqs, model_fit)
-  plt.xlim(10**-5, 10**-1)
-  plt.ylim(10**-5.5, 10**0.5)
-  ax2.set_ylabel('Power', fontsize=font_size-2)
-  ax2.set_xlabel('Frequency [Hz]', fontsize=font_size-2)
-  plt.text(0.005, 10**-0.5, r'$n$ = {0:0.2f}'.format(param[1]), fontsize=font_size)
-  #plt.savefig('C:/Users/Brendan/Desktop/segment%iof%i.pdf' % ((i+1),n_segments), format='pdf', bbox_inches='tight')
+    spec_avg = np.average(spectra_seg, axis=0)
+    
+    full_spec_avg[seg] = spec_avg
+    
+    # plot timeseries & spectrum for averaged segments
+    param, model_fit = spec_fit(spec_avg)
+    print('%0.3e, %0.3e, %0.3e, %0.3e, %0.2f, %0.2f' % (param[0], param[1], param[2], param[3], param[4], param[5]))
+    
+    plt.figure(figsize=(14,6))
+    #ax1 = plt.subplot2grid((20,11),(1, 0), colspan=11, rowspan=9)
+    ax1 = plt.subplot2grid((10,22),(0, 0), colspan=10, rowspan=10)
+    ax1.set_title('Timeseries: Segment #%i' % (seg+1), y=1.01, fontsize=font_size)
+    plt.plot(t_split[seg]/60, split[seg])
+    plt.ylim(0,1700)
+    ax1.set_ylabel('Intensity', fontsize=font_size-2)
+    ax1.set_xlabel('Time [min]', fontsize=font_size-2)
+      
+    #ax2 = plt.subplot2grid((20,11),(11, 0), colspan=11, rowspan=9)
+    ax2 = plt.subplot2grid((10,22),(0, 12), colspan=10, rowspan=10)
+    ax2.set_title('3x3 Averaged Spectrum: Segment #%i' % (seg+1), y=1.01, fontsize=font_size)
+    #ax2.set_title('Averaged Spectrum w/o Segment #3', y=1.01, fontsize=font_size)
+    plt.loglog(freqs, spec_avg)
+    plt.loglog(freqs, model_fit)
+    plt.xlim(10**-5, 10**-1)
+    plt.ylim(10**-5.5, 10**0.5)
+    ax2.set_ylabel('Power', fontsize=font_size-2)
+    ax2.set_xlabel('Frequency [Hz]', fontsize=font_size-2)
+    plt.text(0.005, 10**-0.5, r'$n$ = {0:0.2f}'.format(param[1]), fontsize=font_size)
+    #plt.text(0.00503, 10**-0.77, r'$\beta$ = {0:0.1f} [min]'.format((1./np.exp(param[4]))/60.), fontsize=font_size)
+    #plt.savefig('C:/Users/Brendan/Desktop/3x3_averaged_spectrum_seg%i.pdf' % (seg+1), format='pdf', bbox_inches='tight')
+    #plt.savefig('C:/Users/Brendan/Desktop/6x2hour_averaged_spectrum_minus_seg3.pdf', format='pdf', bbox_inches='tight')
+    #"""
 
-avg_array /= n_segments  # take the average of the segments
-#avg_array /= 5  # take the average of the segments
-#avg_array /= 4  # take the average of the segments
-
+final_spec_avg = np.average(full_spec_avg, axis=0)
 
 # plot timeseries & spectrum for averaged segments
-param, model_fit = spec_fit(avg_array)
+param, model_fit = spec_fit(final_spec_avg)
 print('%0.3e, %0.3e, %0.3e, %0.3e, %0.2f, %0.2f' % (param[0], param[1], param[2], param[3], param[4], param[5]))
 
 plt.figure(figsize=(14,6))
@@ -270,9 +323,9 @@ ax1.set_xlabel('Time [min]', fontsize=font_size-2)
   
 #ax2 = plt.subplot2grid((20,11),(11, 0), colspan=11, rowspan=9)
 ax2 = plt.subplot2grid((10,22),(0, 12), colspan=10, rowspan=10)
-ax2.set_title('Averaged Spectrum', y=1.01, fontsize=font_size)
+ax2.set_title('3x3 Averaged Spectrum: All Segments', y=1.01, fontsize=font_size)
 #ax2.set_title('Averaged Spectrum w/o Segment #3', y=1.01, fontsize=font_size)
-plt.loglog(freqs, avg_array)
+plt.loglog(freqs, final_spec_avg)
 plt.loglog(freqs, model_fit)
 plt.xlim(10**-5, 10**-1)
 plt.ylim(10**-5.5, 10**0.5)
@@ -280,11 +333,48 @@ ax2.set_ylabel('Power', fontsize=font_size-2)
 ax2.set_xlabel('Frequency [Hz]', fontsize=font_size-2)
 plt.text(0.005, 10**-0.5, r'$n$ = {0:0.2f}'.format(param[1]), fontsize=font_size)
 #plt.text(0.00503, 10**-0.77, r'$\beta$ = {0:0.1f} [min]'.format((1./np.exp(param[4]))/60.), fontsize=font_size)
-#plt.savefig('C:/Users/Brendan/Desktop/6x2hour_averaged_spectrum.pdf', format='pdf', bbox_inches='tight')
-#plt.savefig('C:/Users/Brendan/Desktop/6x2hour_averaged_spectrum_minus_seg3.pdf', format='pdf', bbox_inches='tight')
-#"""
+#plt.savefig('C:/Users/Brendan/Desktop/3x3_averaged_spectrum_all_segs.pdf', format='pdf', bbox_inches='tight')
 
 
+
+
+
+
+spec_avg_1 = np.array(full_spec_avg[0])
+spec_avg_456 = np.array(full_spec_avg[3:])
+spec_avg_1456 = np.vstack((spec_avg_1,spec_avg_456))
+spec_avg_no23 = np.average(spec_avg_1456, axis=0)
+
+# plot timeseries & spectrum for averaged segments
+param, model_fit = spec_fit(spec_avg_no23)
+print('%0.3e, %0.3e, %0.3e, %0.3e, %0.2f, %0.2f' % (param[0], param[1], param[2], param[3], param[4], param[5]))
+
+plt.figure(figsize=(14,6))
+#ax1 = plt.subplot2grid((20,11),(1, 0), colspan=11, rowspan=9)
+ax1 = plt.subplot2grid((10,22),(0, 0), colspan=10, rowspan=10)
+ax1.set_title('Timeseries w/o Segments 2 & 3', y=1.01, fontsize=font_size)
+plt.plot(t_interp/60, v_interp)
+rect = mpatches.Rectangle((t_split[1][0]/60,0),(t_split[2][-1]/60-t_split[1][0]/60),1700,hatch='/',color='r', alpha=0.7)
+ax1.add_patch(rect)
+plt.ylim(0,1700)
+ax1.set_ylabel('Intensity', fontsize=font_size-2)
+ax1.set_xlabel('Time [min]', fontsize=font_size-2)
+  
+#ax2 = plt.subplot2grid((20,11),(11, 0), colspan=11, rowspan=9)
+ax2 = plt.subplot2grid((10,22),(0, 12), colspan=10, rowspan=10)
+ax2.set_title('3x3 Averaged Spectrum w/o Segments 2 & 3', y=1.01, fontsize=font_size)
+#ax2.set_title('Averaged Spectrum w/o Segment #3', y=1.01, fontsize=font_size)
+plt.loglog(freqs, spec_avg_no23)
+plt.loglog(freqs, model_fit)
+plt.xlim(10**-5, 10**-1)
+plt.ylim(10**-5.5, 10**0.5)
+ax2.set_ylabel('Power', fontsize=font_size-2)
+ax2.set_xlabel('Frequency [Hz]', fontsize=font_size-2)
+plt.text(0.005, 10**-0.5, r'$n$ = {0:0.2f}'.format(param[1]), fontsize=font_size)
+#plt.text(0.00503, 10**-0.77, r'$\beta$ = {0:0.1f} [min]'.format((1./np.exp(param[4]))/60.), fontsize=font_size)
+#plt.savefig('C:/Users/Brendan/Desktop/3x3_averaged_spectrum_no_seg_2or3.pdf', format='pdf', bbox_inches='tight')
+
+"""
 # plot timeseries & spectrum from full 12-hours
 sample_freq = fftpack.fftfreq(len(t_interp), d=time_step)
 pidxs = np.where(sample_freq > 0)
@@ -297,18 +387,6 @@ norm = len(v_interp)
 powers = ((powers/norm)**2)*(1./(v_interp.std()**2))*2   # normalize the power
 
 powers *= 6
-
-"""
-plt.figure()
-ax1 = plt.subplot2grid((20,11),(1, 0), colspan=11, rowspan=9)
-plt.plot(t_interp/60, v_interp)
-plt.ylim(0,1700)
-  
-ax2 = plt.subplot2grid((20,11),(11, 0), colspan=11, rowspan=9)
-plt.loglog(freqs, powers*6)
-plt.xlim(10**-4.5, 10**-1)
-plt.ylim(10**-5, 10**0)
-"""
 
 param, model_fit = spec_fit(powers)
 print('%0.3e, %0.3e, %0.3e, %0.3e, %0.2f, %0.2f' % (param[0], param[1], param[2], param[3], param[4], param[5]))
@@ -333,35 +411,4 @@ ax2.set_ylabel('Power', fontsize=font_size-2)
 ax2.set_xlabel('Frequency [Hz]', fontsize=font_size-2)
 plt.text(0.005, 10**-0.5, r'$n$ = {0:0.2f}'.format(param[1]), fontsize=font_size)
 #plt.text(0.00503, 10**-0.77, r'$\beta$ = {0:0.1f} [min]'.format((1./np.exp(param[4]))/60.), fontsize=font_size)
-
-
-"""
-# averaging timeseries segments
-
-v_avg = (split[0] + split[1] + split[2] + split[3] + split[4] + split[5]) / 6
-
-# plot timeseries & spectrum from full 12-hours
-sample_freq = fftpack.fftfreq(len(t_split[0]), d=time_step)
-pidxs = np.where(sample_freq > 0)
-freqs = sample_freq[pidxs]
-
-sig_fft = fftpack.fft(v_avg)
-#sig_fft = fftpack.rfft(sig)  # real-FFT                
-powers = np.abs(sig_fft)[pidxs]
-norm = len(v_avg)
-powers = ((powers/norm)**2)*(1./(v_avg.std()**2))*2   # normalize the power
-
-param, model_fit = spec_fit(powers)
-print('%0.3e, %0.3e, %0.3e, %0.3e, %0.2f, %0.2f' % (param[0], param[1], param[2], param[3], param[4], param[5]))
-
-plt.figure(figsize=(14,6))
-ax1 = plt.subplot2grid((10,21),(0, 0), colspan=10, rowspan=10)
-plt.plot(t_split[0]/60, v_avg)
-plt.ylim(0,1700)
-  
-ax2 = plt.subplot2grid((10,21),(0, 11), colspan=10, rowspan=10)
-plt.loglog(freqs, powers)
-plt.loglog(freqs, model_fit)
-plt.xlim(10**-5, 10**-1)
-plt.ylim(10**-5.5, 10**0.5)
 """

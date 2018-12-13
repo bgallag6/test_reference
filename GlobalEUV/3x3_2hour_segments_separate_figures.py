@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Jul 18 08:21:10 2018
+Created on Thu Jul 19 08:16:55 2018
 
 @author: Brendan
 """
@@ -158,14 +158,14 @@ date = '20130626'
 wavelength = 171
 n_segments = 6
 
-cube_shape = np.load('%s/DATA/Temp/%s/%i/derotated_mmap_shape.npy' % (directory, date, wavelength))
-cube = np.memmap('%s/DATA/Temp/%s/%i/derotated_mmap.npy' % (directory, date, wavelength), dtype='int16', mode='r', shape=(cube_shape[0], cube_shape[1], cube_shape[2]))
+cube_shape = np.load('%s/DATA/%s/%i/derotated_mmap_shape.npy' % (directory, date, wavelength))
+cube = np.memmap('%s/DATA/%s/%i/derotated_mmap.npy' % (directory, date, wavelength), dtype='int16', mode='r', shape=(cube_shape[0], cube_shape[1], cube_shape[2]))
 
-time = np.load('%s/DATA/Temp/%s/%i/time.npy' % (directory, date, wavelength))
-exposure = np.load('%s/DATA/Temp/%s/%i/exposure.npy' % (directory, date, wavelength))
+time = np.load('%s/DATA/%s/%i/time.npy' % (directory, date, wavelength))
+exposure = np.load('%s/DATA/%s/%i/exposure.npy' % (directory, date, wavelength))
 
-hmap = np.load('%s/DATA/Output/%s/%i/param.npy' % (directory, date, wavelength))[4]
-vis = np.load('%s/DATA/Output/%s/%i/visual.npy' % (directory, date, wavelength))
+hmap = np.load('%s/DATA/%s/%i/param.npy' % (directory, date, wavelength))[4]
+vis = np.load('%s/DATA/%s/%i/visual.npy' % (directory, date, wavelength))
 
 font_size = 15
 
@@ -312,17 +312,17 @@ final_spec_avg = np.average(full_spec_avg, axis=0)
 param, model_fit = spec_fit(final_spec_avg)
 print('%0.3e, %0.3e, %0.3e, %0.3e, %0.2f, %0.2f' % (param[0], param[1], param[2], param[3], param[4], param[5]))
 
-plt.figure(figsize=(14,6))
-#ax1 = plt.subplot2grid((20,11),(1, 0), colspan=11, rowspan=9)
-ax1 = plt.subplot2grid((10,22),(0, 0), colspan=10, rowspan=10)
+plt.figure(figsize=(14,4))
+ax1 = plt.gca()
 ax1.set_title('Timeseries', y=1.01, fontsize=font_size)
 plt.plot(t_interp/60, v_interp)
 plt.ylim(0,1700)
 ax1.set_ylabel('Intensity', fontsize=font_size-2)
 ax1.set_xlabel('Time [min]', fontsize=font_size-2)
-  
-#ax2 = plt.subplot2grid((20,11),(11, 0), colspan=11, rowspan=9)
-ax2 = plt.subplot2grid((10,22),(0, 12), colspan=10, rowspan=10)
+#plt.savefig('C:/Users/Brendan/Desktop/timeseries_all_segs.pdf', format='pdf', bbox_inches='tight')
+
+plt.figure(figsize=(7,6))
+ax2 = plt.gca()  
 ax2.set_title('3x3 Averaged Spectrum: All Segments', y=1.01, fontsize=font_size)
 #ax2.set_title('Averaged Spectrum w/o Segment #3', y=1.01, fontsize=font_size)
 plt.loglog(freqs, final_spec_avg)
@@ -349,9 +349,8 @@ spec_avg_no23 = np.average(spec_avg_1456, axis=0)
 param, model_fit = spec_fit(spec_avg_no23)
 print('%0.3e, %0.3e, %0.3e, %0.3e, %0.2f, %0.2f' % (param[0], param[1], param[2], param[3], param[4], param[5]))
 
-plt.figure(figsize=(14,6))
-#ax1 = plt.subplot2grid((20,11),(1, 0), colspan=11, rowspan=9)
-ax1 = plt.subplot2grid((10,22),(0, 0), colspan=10, rowspan=10)
+plt.figure(figsize=(14,4))
+ax1 = plt.gca()
 ax1.set_title('Timeseries w/o Segments 2 & 3', y=1.01, fontsize=font_size)
 plt.plot(t_interp/60, v_interp)
 rect = mpatches.Rectangle((t_split[1][0]/60,0),(t_split[2][-1]/60-t_split[1][0]/60),1700,hatch='/',color='r', alpha=0.7)
@@ -359,9 +358,10 @@ ax1.add_patch(rect)
 plt.ylim(0,1700)
 ax1.set_ylabel('Intensity', fontsize=font_size-2)
 ax1.set_xlabel('Time [min]', fontsize=font_size-2)
+#plt.savefig('C:/Users/Brendan/Desktop/3x3_averaged_spectrum_no_seg_2or3.pdf', format='pdf', bbox_inches='tight')
   
-#ax2 = plt.subplot2grid((20,11),(11, 0), colspan=11, rowspan=9)
-ax2 = plt.subplot2grid((10,22),(0, 12), colspan=10, rowspan=10)
+plt.figure(figsize=(7,6))
+ax2 = plt.gca()  
 ax2.set_title('3x3 Averaged Spectrum w/o Segments 2 & 3', y=1.01, fontsize=font_size)
 #ax2.set_title('Averaged Spectrum w/o Segment #3', y=1.01, fontsize=font_size)
 plt.loglog(freqs, spec_avg_no23)
@@ -372,7 +372,44 @@ ax2.set_ylabel('Power', fontsize=font_size-2)
 ax2.set_xlabel('Frequency [Hz]', fontsize=font_size-2)
 plt.text(0.005, 10**-0.5, r'$n$ = {0:0.2f}'.format(param[1]), fontsize=font_size)
 #plt.text(0.00503, 10**-0.77, r'$\beta$ = {0:0.1f} [min]'.format((1./np.exp(param[4]))/60.), fontsize=font_size)
-#plt.savefig('C:/Users/Brendan/Desktop/3x3_averaged_spectrum_no_seg_2or3.pdf', format='pdf', bbox_inches='tight')
+#plt.savefig('C:/Users/Brendan/Desktop/timeseries_no_seg_2or3.pdf', format='pdf', bbox_inches='tight')
+
+
+
+
+
+spec_avg_12 = np.array(full_spec_avg[:2])
+spec_avg_12456 = np.vstack((spec_avg_12,spec_avg_456))
+spec_avg_no3 = np.average(spec_avg_12456, axis=0)
+
+# plot timeseries & spectrum for averaged segments
+param, model_fit = spec_fit(spec_avg_no3)
+print('%0.3e, %0.3e, %0.3e, %0.3e, %0.2f, %0.2f' % (param[0], param[1], param[2], param[3], param[4], param[5]))
+
+plt.figure(figsize=(14,4))
+ax1 = plt.gca()
+ax1.set_title('Timeseries w/o Segment 3', y=1.01, fontsize=font_size)
+plt.plot(t_interp/60, v_interp)
+rect = mpatches.Rectangle((t_split[2][0]/60,0),(t_split[2][-1]/60-t_split[2][0]/60),1700,hatch='/',color='r', alpha=0.7)
+ax1.add_patch(rect)
+plt.ylim(0,1700)
+ax1.set_ylabel('Intensity', fontsize=font_size-2)
+ax1.set_xlabel('Time [min]', fontsize=font_size-2)
+#plt.savefig('C:/Users/Brendan/Desktop/3x3_averaged_spectrum_no_seg_3.pdf', format='pdf', bbox_inches='tight')
+  
+plt.figure(figsize=(7,6))
+ax2 = plt.gca()  
+ax2.set_title('3x3 Averaged Spectrum w/o Segment 3', y=1.01, fontsize=font_size)
+#ax2.set_title('Averaged Spectrum w/o Segment #3', y=1.01, fontsize=font_size)
+plt.loglog(freqs, spec_avg_no3)
+plt.loglog(freqs, model_fit)
+plt.xlim(10**-5, 10**-1)
+plt.ylim(10**-5.5, 10**0.5)
+ax2.set_ylabel('Power', fontsize=font_size-2)
+ax2.set_xlabel('Frequency [Hz]', fontsize=font_size-2)
+plt.text(0.005, 10**-0.5, r'$n$ = {0:0.2f}'.format(param[1]), fontsize=font_size)
+#plt.text(0.00503, 10**-0.77, r'$\beta$ = {0:0.1f} [min]'.format((1./np.exp(param[4]))/60.), fontsize=font_size)
+#plt.savefig('C:/Users/Brendan/Desktop/timeseries_no_seg_3.pdf', format='pdf', bbox_inches='tight')
 
 """
 # plot timeseries & spectrum from full 12-hours
