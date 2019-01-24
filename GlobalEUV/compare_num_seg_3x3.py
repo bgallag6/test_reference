@@ -302,61 +302,101 @@ for n in range(len(num_seg)):
         fit1 = fit
     if n_segments == 2:
         fit2 = fit
-        ax1 = plt.subplot2grid((21,22),(0, 0), colspan=10, rowspan=10)
+        ax1 = plt.subplot2grid((23,22),(0, 0), colspan=10, rowspan=10)
+        plt.suptitle('Sample Point D: Effects of segment averaging', fontsize=font_size+6, y=0.96)
         #ax1.set_title('(1) 12-Hour Segment', fontsize=font_size)
-        ax1.set_title('(2) 6-Hour Segments', fontsize=font_size)
-        ax1.set_ylabel('Power', fontsize=font_size-2)
-        plt.loglog(freqs, s)
-        plt.loglog(freqs, fit)
-        plt.xlim(10**-5, 10**-1)
-        plt.ylim(10**-5.5, 10**0.5) 
+        ax1.set_title('a) 2 x 6-Hour Segments', fontsize=font_size)
+        ax1.set_ylabel('Power', fontsize=font_size, labelpad=1)
+        ax1.set_xlabel('Frequency [Hz]', fontsize=font_size, labelpad=1)
+        """
+        plt.loglog(freqs, s, 'k')
+        plt.loglog(freqs, fit, color='purple')
+        plt.vlines((1.0/300.),10**-8,10**1, linestyles='dashed', label='5 minutes')
+        plt.vlines((1.0/180.),10**-8,10**1, linestyles='dotted', label='3 minutes')
+        plt.xlim(10**-4.5, 10**-1)
+        #plt.ylim(10**-5.5, 10**0.5) 
+        plt.ylim(10**-5., 10**0)
         plt.text(10**-2.53,10**-0.5,'n = %0.2f' % params[1], fontsize=font_size)
         plt.text(10**-2.53,10**-0.95,'β = %0.2f [min]' % ((1./np.exp(params[4]))/60.), fontsize=font_size) 
         plt.text(10**-3,10**-1.4,r'FWHM = %0.2f [min]' % fwhm, fontsize=font_size)
         #avg_array1 = spec_geo
+        """
     elif n_segments == 3:
         fit3 = fit
-        ax2 = plt.subplot2grid((21,22),(0, 12), colspan=10, rowspan=10)
-        ax2.set_title('(3) 4-Hour Segments', fontsize=font_size)
-        plt.loglog(freqs, s)
-        plt.loglog(freqs, fit)
-        plt.xlim(10**-5, 10**-1)
-        plt.ylim(10**-5.5, 10**0.5) 
+        ax2 = plt.subplot2grid((23,22),(0, 12), colspan=10, rowspan=10)
+        ax2.set_title('b) 3 x 4-Hour Segments', fontsize=font_size)
+        ax2.set_ylabel('Power', fontsize=font_size, labelpad=1)
+        ax2.set_xlabel('Frequency [Hz]', fontsize=font_size, labelpad=1)
+        """
+        plt.loglog(freqs, s, 'k')
+        plt.loglog(freqs, fit, color='purple')
+        plt.vlines((1.0/300.),10**-8,10**1, linestyles='dashed', label='5 minutes')
+        plt.vlines((1.0/180.),10**-8,10**1, linestyles='dotted', label='3 minutes')
+        plt.xlim(10**-4.5, 10**-1)
+        #plt.ylim(10**-5.5, 10**0.5) 
+        plt.ylim(10**-5., 10**0)
         plt.text(10**-2.53,10**-0.5,'n = %0.2f' % params[1], fontsize=font_size)
         plt.text(10**-2.53,10**-0.95,'β = %0.2f [min]' % ((1./np.exp(params[4]))/60.), fontsize=font_size) 
         plt.text(10**-3,10**-1.4,r'FWHM = %0.2f [min]' % fwhm, fontsize=font_size)
         #avg_array3 = avg_array
         #avg_array3 = spec_geo/3.
+        """
     elif n_segments == 6:
         fit6 = fit
-        ax3 = plt.subplot2grid((21,22),(12, 0), colspan=10, rowspan=10)
-        ax3.set_title('(6) 2-Hour Segments', fontsize=font_size)
-        ax3.set_ylabel('Power', fontsize=font_size-2)
-        ax3.set_xlabel('Frequency [Hz]', fontsize=font_size-2)
-        plt.loglog(freqs, s)
-        plt.loglog(freqs, fit)
-        plt.xlim(10**-5, 10**-1)
-        plt.ylim(10**-5.5, 10**0.5) 
+        ax3 = plt.subplot2grid((23,22),(13, 0), colspan=10, rowspan=10)
+        ax3.set_title('c) 6 x 2-Hour Segments', fontsize=font_size)
+        ax3.set_ylabel('Power', fontsize=font_size, labelpad=1)
+        ax3.set_xlabel('Frequency [Hz]', fontsize=font_size, labelpad=1)
+        """
+        plt.loglog(freqs, s, 'k')
+        plt.loglog(freqs, fit, color='purple')
+        plt.vlines((1.0/300.),10**-8,10**1, linestyles='dashed', label='5 minutes')
+        plt.vlines((1.0/180.),10**-8,10**1, linestyles='dotted', label='3 minutes')
+        plt.xlim(10**-4.5, 10**-1)
+        #plt.ylim(10**-5.5, 10**0.5) 
+        plt.ylim(10**-5., 10**0)
         plt.text(10**-2.53,10**-0.5,'n = %0.2f' % params[1], fontsize=font_size)
         plt.text(10**-2.53,10**-0.95,'β = %0.2f [min]' % ((1./np.exp(params[4]))/60.), fontsize=font_size) 
         plt.text(10**-3,10**-1.4,r'FWHM = %0.2f [min]' % fwhm, fontsize=font_size)
         #avg_array6 = avg_array
         #avg_array6 = spec_geo/6.
+        """
     elif n_segments == 12:
         fit12 = fit
-        ax4 = plt.subplot2grid((21,22),(12, 12), colspan=10, rowspan=10)
-        ax4.set_title('(12) 1-Hour Segments', fontsize=font_size)
-        ax4.set_xlabel('Frequency [Hz]', fontsize=font_size-2)
-        plt.loglog(freqs, s)
-        plt.loglog(freqs, fit)
-        plt.xlim(10**-5, 10**-1)
-        plt.ylim(10**-5.5, 10**0.5) 
+        ax4 = plt.subplot2grid((23,22),(13, 12), colspan=10, rowspan=10)
+        ax4.set_title('d) 12 x 1-Hour Segments', fontsize=font_size)
+        ax4.set_ylabel('Power', fontsize=font_size, labelpad=1)
+        ax4.set_xlabel('Frequency [Hz]', fontsize=font_size, labelpad=1)
+        """
+        plt.loglog(freqs, s, 'k')
+        plt.loglog(freqs, fit, color='purple')
+        plt.vlines((1.0/300.),10**-8,10**1, linestyles='dashed', label='5 minutes')
+        plt.vlines((1.0/180.),10**-8,10**1, linestyles='dotted', label='3 minutes')
+        plt.xlim(10**-4.5, 10**-1)
+        #plt.ylim(10**-5.5, 10**0.5) 
+        plt.ylim(10**-5., 10**0)
         plt.text(10**-2.53,10**-0.5,'n = %0.2f' % params[1], fontsize=font_size)
         plt.text(10**-2.53,10**-0.95,'β = %0.2f [min]' % ((1./np.exp(params[4]))/60.), fontsize=font_size) 
         plt.text(10**-3,10**-1.4,r'FWHM = %0.2f [min]' % fwhm, fontsize=font_size)
         #avg_array12 = avg_array
         #avg_array12 = spec_geo/12.
         #plt.savefig('C:/Users/Brendan/Desktop/spectra_time_segmenting_3x3B.pdf', format='pdf', bbox_inches='tight')
+        """
+        
+    plt.loglog(freqs, s, 'k')
+    plt.loglog(freqs, fit, color='purple')
+    plt.xticks(fontsize=font_size)
+    plt.yticks(fontsize=font_size)
+    plt.xlim(10**-4.5, 10**-1)
+    #plt.ylim(10**-5.5, 10**0.5) 
+    plt.ylim(10**-5., 10**0)
+    plt.text(10**-2.03, 10**-0.7,'n = %0.2f' % params[1], fontsize=font_size)
+    plt.text(10**-2.03, 10**-1.15,'β = %0.2f [min]' % ((1./np.exp(params[4]))/60.), fontsize=font_size) 
+    plt.text(10**-2.445, 10**-1.6,r'FWHM = %0.2f [min]' % fwhm, fontsize=font_size)
+    
+    if n_segments == 12:
+        pass
+        #plt.savefig('C:/Users/Brendan/Desktop/spectra_time_segmenting_3x3C.ps', format='ps', bbox_inches='tight')
 
 #spectra_seg[jj-245+(ii-163)*3] = powers  # construct 3D array with averaged FFTs from each pixel
 #spectra_std = np.std(spectra_seg, axis=0)
@@ -370,7 +410,7 @@ font_size = 27
     
 plt.figure(figsize=(13,9))
 ax = plt.gca()  
-plt.title('Comparison of Temporal Averaging Methods', y=1.01, fontsize=25)
+plt.title('e) Comparison of Temporal Averaging Methods', y=1.01, fontsize=23)
 plt.loglog(freqs1,avg_array1, 'k', linewidth=1.7, label='(1) 12-Hour Segment')
 plt.loglog(freqs2,avg_array2, color='orange', linewidth=1.7, label='(2) 6-Hour Segments')
 plt.loglog(freqs3,avg_array3, 'b', linewidth=1.7, label='(3) 4-Hour Segments')
@@ -383,17 +423,17 @@ plt.loglog(freqs6,fit6, 'g--', linewidth=1.7)
 plt.loglog(freqs12,fit12, 'r--', linewidth=1.7)
 #plt.ylim(10**-6.5,10**0)
 #plt.xlim(10**-5.,10**-1.3)
-plt.xlim(10**-5, 10**-1.2)
+plt.xlim(10**-5, 10**-1.)
 plt.ylim(10**-6, 10**0)
-plt.xticks(fontsize=font_size, fontname="Times New Roman")
-plt.yticks(fontsize=font_size, fontname="Times New Roman")
-ax.set_ylabel('Power', fontsize=font_size-2)
-ax.set_xlabel('Frequency [Hz]', fontsize=font_size-2)
+plt.xticks(fontsize=font_size-4, fontname="Times New Roman")
+plt.yticks(fontsize=font_size-4, fontname="Times New Roman")
+ax.set_ylabel('Power', fontsize=font_size-3)
+ax.set_xlabel('Frequency [Hz]', fontsize=font_size-3)
 plt.tick_params(axis='both', which='major', pad=10)
-legend = plt.legend(loc='lower left', prop={'size':font_size}, labelspacing=0.35)
+legend = plt.legend(loc='lower left', prop={'size':font_size-4}, labelspacing=0.35)
 for label in legend.get_lines():
     label.set_linewidth(3.0)  # the legend line width
-#plt.savefig('C:/Users/Brendan/Desktop/spectra_temporal_averaging_methods_3x3B.pdf', format='pdf', bbox_inches='tight')
+#plt.savefig('C:/Users/Brendan/Desktop/spectra_temporal_averaging_methods_3x3C.ps', format='ps', bbox_inches='tight')
 
 #np.save('C:/Users/Brendan/Desktop/spec_array1_jack.npy', avg_array1)
 #np.save('C:/Users/Brendan/Desktop/spec_array3_jack.npy', avg_array3)
