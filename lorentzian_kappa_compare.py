@@ -69,16 +69,17 @@ wavelength = 171
 n_segments = 6
 """
 
-directory = 'F:'
-date = '20140818'
-wavelength = 1600
+#directory = 'F:'
+#date = '20140818'
+#wavelength = 1600
+directory = '/Users/bgallagher/Documents/SDO'
+date = '20120702'
+wavelength = 1700
 
-#cube_shape = np.load('%s/DATA/Temp/%s/%i/derotated_mmap_shape.npy' % (directory, date, wavelength))
-#DATA = np.memmap('%s/DATA/Temp/%s/%i/derotated_mmap.npy' % (directory, date, wavelength), dtype='int16', mode='r', shape=(cube_shape[0], cube_shape[1], cube_shape[2]))
-DATA = np.load('%s/DATA/Temp/%s/%i/derotated.npy' % (directory, date, wavelength))
+DATA = np.load('%s/DATA/%s/%i/dataCube.npy' % (directory, date, wavelength))
 
-TIME = np.load('%s/DATA/Temp/%s/%i/time.npy' % (directory, date, wavelength))
-Ex = np.load('%s/DATA/Temp/%s/%i/exposure.npy' % (directory, date, wavelength))
+TIME = np.load('%s/DATA/%s/%i/timestamps.npy' % (directory, date, wavelength))
+Ex = np.load('%s/DATA/%s/%i/exposures.npy' % (directory, date, wavelength))
 
 font_size = 15
 
@@ -88,7 +89,7 @@ if wavelength in [1600,1700]:
 else:
     time_step = 12
 
-t_interp = np.linspace(0, TIME[len(TIME)-1], int((TIME[len(TIME)-1]/time_step)+1))  # interpolate onto default-cadence time-grid
+t_interp0 = np.linspace(0, TIME[len(TIME)-1], int((TIME[len(TIME)-1]/time_step)+1))  # interpolate onto default-cadence time-grid
 
 #x0 = [853, 300, 965, 834]
 #y0 = [316, 520, 865, 1413]    
@@ -107,14 +108,19 @@ y0 = [27]
 
 k = 0
  
-n_segments = 6
-r = len(t_interp)
+n_segments = 2
+r = len(t_interp0)
 rem = r % n_segments
+
+
+
 freq_size = (r - rem) // n_segments 
 
 sample_freq = fftpack.fftfreq(freq_size, d=time_step)
 pidxs = np.where(sample_freq > 0)
 freqs = sample_freq[pidxs]
+
+#freqs = np.load('%s/DATA/%s/%i/frequencies.npy' % (directory, date, wavelength))
 
 spectra_seg = np.zeros((9,len(freqs)))
 
@@ -125,17 +131,17 @@ for m0 in [-1,0,1]:
         x = x0[k] + n0
         y = y0[k] + m0
             
-        pixmed = DATA[:,y,x] / Ex  # extract timeseries + normalize by exposure time   
+        pixmed = DATA[y,x] / Ex  # extract timeseries + normalize by exposure time   
         
-        v_interp = np.interp(t_interp,TIME,pixmed)  # interpolate pixel-intensity values onto specified time grid
+        v_interp = np.interp(t_interp0,TIME,pixmed)  # interpolate pixel-intensity values onto specified time grid
         
         data = v_interp
         
         avg_array = np.zeros((len(freqs)))  # initialize array to hold fourier powers
         
         data = data[0:len(data)-rem]  # trim timeseries to be integer multiple of n_segments
+        t_interp = t_interp0[:len(t_interp0)-rem]
         split = np.split(data, n_segments)  # create split array for each segment
-        t_interp = t_interp[:len(t_interp)-rem]
         t_split = np.split(t_interp, n_segments)  # create split array for each segment
         
         #"""   
